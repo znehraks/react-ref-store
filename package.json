@@ -38,11 +38,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/YOUR_USERNAME/react-ref-store.git"
+    "url": "https://github.com/znehraks/react-ref-store.git"
   },
-  "homepage": "https://github.com/YOUR_USERNAME/react-ref-store#readme",
+  "homepage": "https://github.com/znehraks/react-ref-store#readme",
   "bugs": {
-    "url": "https://github.com/YOUR_USERNAME/react-ref-store/issues"
+    "url": "https://github.com/znehraks/react-ref-store/issues"
   },
   "peerDependencies": {
     "react": ">=16.8.0"

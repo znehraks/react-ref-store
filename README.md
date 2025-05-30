@@ -1,6 +1,6 @@
 <div align="center">
   <br />
-  <img src="./assets/images/react-refs-store-logo.png" alt="React Ref Store Logo" width="280" />
+  <img src="https://raw.githubusercontent.com/znehraks/react-ref-store/main/assets/images/react-refs-store-logo.png" alt="React Ref Store Logo" width="280" />
   <br />
   <br />
   
@@ -14,7 +14,7 @@
     <a href="https://www.npmjs.com/package/react-ref-store">
       <img src="https://img.shields.io/npm/v/react-ref-store" alt="npm version" />
     </a>
-    <a href="https://github.com/YOUR_USERNAME/react-ref-store/blob/main/LICENSE">
+    <a href="https://github.com/znehraks/react-ref-store/blob/main/LICENSE">
       <img src="https://img.shields.io/npm/l/react-ref-store" alt="license" />
     </a>
     <a href="https://www.npmjs.com/package/react-ref-store">
@@ -172,4 +172,4 @@ Contributions are always welcome! Please read the contribution guidelines first.
 
 ## 🐛 Issues
 
-If you find a bug, please create an issue [here](https://github.com/YOUR_USERNAME/react-ref-store/issues).
+If you find a bug, please create an issue [here](https://github.com/znehraks/react-ref-store/issues).
