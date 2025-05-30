@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from 'react';
 
-import type { RefsMap } from './useRefsMap';
+import type { RefsMap } from './useRefsStore';
 
 interface UseRegisterRefOptions {
   /** 등록을 지연시킬지 여부 (기본값: true, requestAnimationFrame 사용) */
@@ -10,26 +10,26 @@ interface UseRegisterRefOptions {
 }
 
 /**
- * DOM 요소를 Registry에 등록하는 훅
+ * DOM 요소를 Store에 등록하는 훅
  *
- * @param registry - DOMRegistry 인스턴스
+ * @param store - RefsStore 인스턴스
  * @param key - 요소를 식별할 고유 키
  * @param options - 등록 옵션
  * @returns 등록할 DOM 요소의 ref
  *
  * @example
  * ```tsx
- * const TabRegistry = createDOMRegistry<HTMLButtonElement>();
+ * const TabRefsStore = createRefsStore<HTMLButtonElement>();
  *
  * function Tab({ id, children }) {
- *   const registry = TabRegistry.useRegistry();
- *   const ref = useDOMRegistration(registry, id);
+ *   const registry = TabRefsStore.useRegistry();
+ *   const ref = useRegisterRef(registry, id);
  *   return <button ref={ref}>{children}</button>;
  * }
  * ```
  */
 export function useRegisterRef<T extends HTMLElement = HTMLElement>(
-  registry: RefsMap<T> | null,
+  store: RefsMap<T> | null,
   key: string,
   options: UseRegisterRefOptions = {},
 ) {
@@ -37,11 +37,11 @@ export function useRegisterRef<T extends HTMLElement = HTMLElement>(
   const elementRef = useRef<T>(null);
 
   useLayoutEffect(() => {
-    if (!registry || !isEnabled) return () => {};
+    if (!store || !isEnabled) return () => {};
 
     const register = () => {
       if (elementRef.current) {
-        registry.register(key, elementRef.current);
+        store.register(key, elementRef.current);
       }
     };
 
@@ -49,14 +49,14 @@ export function useRegisterRef<T extends HTMLElement = HTMLElement>(
       const rafId = requestAnimationFrame(register);
       return () => {
         cancelAnimationFrame(rafId);
-        registry.unregister(key);
+        store.unregister(key);
       };
     }
     register();
     return () => {
-      registry.unregister(key);
+      store.unregister(key);
     };
-  }, [registry, key, isDefer, isEnabled]);
+  }, [store, key, isDefer, isEnabled]);
 
   return elementRef;
 }

@@ -15,11 +15,11 @@ export interface RefsMap<T extends HTMLElement = HTMLElement> {
  *
  * @example
  * ```tsx
- * const tabRegistry = useDOMRegistry<HTMLButtonElement>();
- * const menuRegistry = useDOMRegistry<HTMLDivElement>();
+ * const tabRefsStore = useRefsStore<HTMLButtonElement>();
+ * const menuRefsStore = useRefsStore<HTMLDivElement>();
  * ```
  */
-export function useRefsMap<T extends HTMLElement = HTMLElement>(): RefsMap<T> {
+export function useRefsStore<T extends HTMLElement = HTMLElement>(): RefsMap<T> {
   const elementsMap = useRef<Map<string, T>>(new Map());
 
   const register = useCallback((key: string, element: T | null) => {
