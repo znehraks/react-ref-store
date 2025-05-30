@@ -1,13 +1,13 @@
 <div align="center">
   <br />
-  <img src="./assets/images/react-refs-store-logo.png" alt="React Ref Store Logo" width="280" />
+  <img src="./react-refs-store-logo.png" alt="React Ref Store Logo" width="280" />
   <br />
   <br />
   
   <h1>React Ref Store</h1>
   
   <p>
-    <strong>React에서 querySelector 대신 ref를 통해 DOM 요소를 관리하는 유틸리티</strong>
+    <strong>A React utility for managing DOM elements through refs instead of querySelector</strong>
   </p>
   
   <p>
@@ -26,7 +26,7 @@
 
 <br />
 
-## 📦 설치
+## 📦 Installation
 
 ```bash
 npm install react-ref-store
@@ -36,50 +36,140 @@ pnpm add react-ref-store
 yarn add react-ref-store
 ```
 
-## 🤔 언제 사용하나요?
+## 🤔 When to Use
 
-- 부모 컴포넌트가 자식 컴포넌트들의 DOM 요소에 접근해야 할 때
-- querySelector를 사용하지 않고 React 친화적으로 DOM을 관리하고 싶을 때
-- 예: 탭, 메뉴, 애니메이션 인디케이터 등
+- When parent components need to access DOM elements of child components
+- When you want to manage DOM in a React-friendly way without using querySelector
+- Examples: tabs, menus, animation indicators, etc.
 
 ## 📖 API
 
 ### 1. `createRefsStore()`
 
-Context와 Provider, Hook을 한 번에 생성하는 팩토리 함수입니다.
+A factory function that creates Context, Provider, and Hook all at once.
 
 ```tsx
 const TabRefsStore = createRefsStore<HTMLButtonElement>();
 
-// 반환값
+// Returns
 {
-  Provider,  // Context Provider 컴포넌트
-  useStore,  // Store를 가져오는 Hook
+  Provider,  // Context Provider component
+  useStore,  // Hook to get the store
 }
 ```
 
 ### 2. `useRefsStore()`
 
-ref들을 Map 자료구조로 관리하는 Store를 생성합니다. (Context 없이 단독 사용)
+Creates a store that manages refs as a Map data structure. (Can be used standalone without Context)
 
 ```tsx
 function MyComponent() {
   const refsStore = useRefsStore<HTMLDivElement>();
-  // Map API 사용: refsStore.get(), refsStore.has() 등
+  // Use Map API: refsStore.get(), refsStore.has(), etc.
 }
 ```
 
 ### 3. `useRegisterRef()`
 
-DOM 요소의 ref를 Store에 등록하는 Hook입니다.
+A hook that registers a DOM element's ref to the Store.
 
 ```tsx
 const ref = useRegisterRef(refsStore, 'unique-key');
 return <div ref={ref}>...</div>;
 ```
 
-## 💡 사용 예시
+## 💡 Usage Examples
 
-### 기본 사용법
+### Basic Usage
 
+```tsx
+// 1. Create Store
+const TabRefsStore = createRefsStore<HTMLButtonElement>();
+
+// 2. Wrap with Provider
+export function TabGroup({ children }) {
+  return (
+    <TabRefsStore.Provider>
+      {children}
+    </TabRefsStore.Provider>
+  );
+}
+
+// 3. Register in child components
+function Tab({ id, children }) {
+  const store = TabRefsStore.useStore();
+  const ref = useRegisterRef(store, id);
+  
+  return <button ref={ref}>{children}</button>;
+}
+
+// 4. Use the Store
+function TabIndicator({ activeTabId }) {
+  const store = TabRefsStore.useStore();
+  const activeTab = store.get(activeTabId);
+  
+  if (!activeTab) return null;
+  
+  const rect = activeTab.getBoundingClientRect();
+  // Calculate position and render indicator...
+}
 ```
+
+### Optional Usage (Outside Provider)
+
+```tsx
+// To use outside Provider
+const store = TabRefsStore.useStore({ optional: true });
+// Need to check if store is null
+if (store) {
+  const element = store.get('tab-1');
+}
+```
+
+### Direct Store Creation
+
+When using standalone without Context:
+
+```tsx
+function StandaloneComponent() {
+  const refsStore = useRefsStore();
+  
+  // Use Map API
+  const buttonRef = refsStore.get('button-1');
+  const hasTab = refsStore.has('tab-1');
+  
+  return <ChildComponent refsStore={refsStore} />;
+}
+```
+
+## Store API (RefsMap)
+
+```tsx
+interface RefsMap<T extends HTMLElement> {
+  register(key: string, element: T | null): void;   // Register element
+  unregister(key: string): void;                     // Unregister element
+  get(key: string): T | null;                        // Get element
+  getAll(): Map<string, T>;                          // Get all elements
+  has(key: string): boolean;                         // Check if element exists
+  clear(): void;                                     // Remove all elements
+}
+```
+
+## Pattern Selection Guide
+
+- **When Context is needed**: Use `createRefsStore()`
+- **For local usage without Context**: Use `useRefsStore()`
+- **Use only inside Provider**: `useStore()`
+- **Use both inside and outside Provider**: `useStore({ optional: true })`
+
+## 📄 License
+
+MIT
+
+## 🤝 Contributing
+
+Contributions are always welcome! Please read the contribution guidelines first.
+
+## 🐛 Issues
+
+If you find a bug, please create an issue [here](https://github.com/YOUR_USERNAME/react-ref-store/issues).
