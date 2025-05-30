@@ -1,8 +1,8 @@
 import { useLayoutEffect, useRef } from 'react';
 
-import type { DOMRegistry } from './useDOMRegistry';
+import type { RefsMap } from './useRefsMap';
 
-interface UseDOMRegistrationOptions {
+interface UseRegisterRefOptions {
   /** 등록을 지연시킬지 여부 (기본값: true, requestAnimationFrame 사용) */
   isDefer?: boolean;
   /** 등록 활성화 여부 (기본값: true) */
@@ -28,10 +28,10 @@ interface UseDOMRegistrationOptions {
  * }
  * ```
  */
-export function useDOMRegistration<T extends HTMLElement = HTMLElement>(
-  registry: DOMRegistry<T> | null,
+export function useRegisterRef<T extends HTMLElement = HTMLElement>(
+  registry: RefsMap<T> | null,
   key: string,
-  options: UseDOMRegistrationOptions = {},
+  options: UseRegisterRefOptions = {},
 ) {
   const { isDefer = true, isEnabled = true } = options;
   const elementRef = useRef<T>(null);

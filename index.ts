@@ -1,4 +1,4 @@
-export { useDOMRegistry } from './useDOMRegistry';
-export type { DOMRegistry } from './useDOMRegistry';
+export { useRefsMap as useDOMRegistry } from './useRefsMap';
+export type { RefsMap } from './useRefsMap';
 export { createDOMRegistry } from './createDOMRegistry';
-export { useDOMRegistration } from './useDOMRegistration';
+export { useRegisterRef as useDOMRegistration } from './useRegisterRef';

@@ -2,8 +2,8 @@ import React from 'react';
 import type { ReactNode } from 'react';
 import { createContext, useContext } from 'react';
 
-import type { DOMRegistry } from './useDOMRegistry';
-import { useDOMRegistry } from './useDOMRegistry';
+import type { RefsMap } from './useRefsMap';
+import { useRefsMap } from './useRefsMap';
 
 /**
  * DOM Registry Context와 Provider를 생성하는 함수
@@ -31,11 +31,11 @@ import { useDOMRegistry } from './useDOMRegistry';
  * ```
  */
 export function createDOMRegistry<T extends HTMLElement = HTMLElement>() {
-  const Context = createContext<DOMRegistry<T> | null>(null);
+  const Context = createContext<RefsMap<T> | null>(null);
 
-  function Provider({ children, registry: externalRegistry }: { children: ReactNode; registry?: DOMRegistry<T> }) {
+  function Provider({ children, registry: externalRegistry }: { children: ReactNode; registry?: RefsMap<T> }) {
     // 외부에서 주입된 registry가 없으면 내부에서 생성
-    const internalRegistry = useDOMRegistry<T>();
+    const internalRegistry = useRefsMap<T>();
     const registry = externalRegistry || internalRegistry;
 
     return <Context.Provider value={registry}>{children}</Context.Provider>;
@@ -56,6 +56,6 @@ export function createDOMRegistry<T extends HTMLElement = HTMLElement>() {
   return {
     Provider,
     useRegistry,
-    Context, // Providers 통합을 위해 노출
+    Context,
   };
 }

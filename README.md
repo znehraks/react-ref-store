@@ -25,23 +25,23 @@ const TabRegistry = createDOMRegistry<HTMLButtonElement>();
 }
 ```
 
-### 2. `useDOMRegistry()`
+### 2. `useRefsMap()`
 
-단독으로 Registry를 생성할 때 사용합니다. (Context 없이)
+ref들을 Map으로 관리하는 Registry를 생성합니다. (Context 없이)
 
 ```tsx
 function MyComponent() {
-  const registry = useDOMRegistry<HTMLDivElement>();
-  // registry를 props로 전달하거나 직접 사용
+  const refsMap = useRefsMap<HTMLDivElement>();
+  // Map처럼 사용: refsMap.get(), refsMap.has() 등
 }
 ```
 
-### 3. `useDOMRegistration()`
+### 3. `useRegisterRef()`
 
-DOM 요소를 Registry에 등록하는 Hook입니다.
+DOM 요소의 ref를 Registry에 등록하는 Hook입니다.
 
 ```tsx
-const ref = useDOMRegistration(registry, 'unique-key');
+const ref = useRegisterRef(refsMap, 'unique-key');
 return <div ref={ref}>...</div>;
 ```
 
@@ -65,7 +65,7 @@ export function TabGroup({ children }) {
 // 3. 자식 컴포넌트에서 등록
 function Tab({ id, children }) {
   const registry = TabRegistry.useRegistry();
-  const ref = useDOMRegistration(registry, id);
+  const ref = useRegisterRef(registry, id);
   
   return <button ref={ref}>{children}</button>;
 }
@@ -96,16 +96,19 @@ Context 없이 단독으로 사용하는 경우:
 
 ```tsx
 function StandaloneComponent() {
-  const registry = useDOMRegistry();
+  const refsMap = useRefsMap();
   
-  // registry를 직접 사용하거나 props로 전달
-  return <ChildComponent registry={registry} />;
+  // Map API 사용
+  const buttonRef = refsMap.get('button-1');
+  const hasTab = refsMap.has('tab-1');
+  
+  return <ChildComponent refsMap={refsMap} />;
 }
 ```
 
 ## 패턴 선택 가이드
 
 - **Context가 필요한 경우**: `createDOMRegistry()` 사용
-- **Context 없이 local하게 사용**: `useDOMRegistry()` 사용
+- **Context 없이 local하게 사용**: `useRefsMap()` 사용
 - **Provider 내부에서만 사용**: `useRegistry()`
 - **Provider 내외부 모두에서 사용**: `useRegistry({ optional: true })` 

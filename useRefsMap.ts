@@ -1,6 +1,6 @@
 import { useRef, useCallback } from 'react';
 
-export interface DOMRegistry<T extends HTMLElement = HTMLElement> {
+export interface RefsMap<T extends HTMLElement = HTMLElement> {
   register: (key: string, element: T | null) => void;
   unregister: (key: string) => void;
   get: (key: string) => T | null;
@@ -19,7 +19,7 @@ export interface DOMRegistry<T extends HTMLElement = HTMLElement> {
  * const menuRegistry = useDOMRegistry<HTMLDivElement>();
  * ```
  */
-export function useDOMRegistry<T extends HTMLElement = HTMLElement>(): DOMRegistry<T> {
+export function useRefsMap<T extends HTMLElement = HTMLElement>(): RefsMap<T> {
   const elementsMap = useRef<Map<string, T>>(new Map());
 
   const register = useCallback((key: string, element: T | null) => {
