@@ -1,6 +1,6 @@
 <div align="center">
   <br />
-  <img src="./react-refs-store-logo.png" alt="React Ref Store Logo" width="280" />
+  <img src="./assets/images/react-refs-store-logo.png" alt="React Ref Store Logo" width="280" />
   <br />
   <br />
   
