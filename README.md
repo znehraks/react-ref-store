@@ -1,14 +1,48 @@
-# Refs Store
+<div align="center">
+  <br />
+  <img src="./assets/images/react-refs-store-logo.png" alt="React Ref Store Logo" width="280" />
+  <br />
+  <br />
+  
+  <h1>React Ref Store</h1>
+  
+  <p>
+    <strong>React에서 querySelector 대신 ref를 통해 DOM 요소를 관리하는 유틸리티</strong>
+  </p>
+  
+  <p>
+    <a href="https://www.npmjs.com/package/react-ref-store">
+      <img src="https://img.shields.io/npm/v/react-ref-store" alt="npm version" />
+    </a>
+    <a href="https://github.com/YOUR_USERNAME/react-ref-store/blob/main/LICENSE">
+      <img src="https://img.shields.io/npm/l/react-ref-store" alt="license" />
+    </a>
+    <a href="https://www.npmjs.com/package/react-ref-store">
+      <img src="https://img.shields.io/npm/dm/react-ref-store" alt="downloads" />
+    </a>
+    <img src="https://img.shields.io/badge/TypeScript-Ready-blue" alt="TypeScript" />
+  </p>
+</div>
 
-React에서 querySelector 대신 ref를 통해 DOM 요소를 관리하는 유틸리티입니다.
+<br />
 
-## 언제 사용하나요?
+## 📦 설치
+
+```bash
+npm install react-ref-store
+# or
+pnpm add react-ref-store
+# or
+yarn add react-ref-store
+```
+
+## 🤔 언제 사용하나요?
 
 - 부모 컴포넌트가 자식 컴포넌트들의 DOM 요소에 접근해야 할 때
 - querySelector를 사용하지 않고 React 친화적으로 DOM을 관리하고 싶을 때
 - 예: 탭, 메뉴, 애니메이션 인디케이터 등
 
-## API
+## 📖 API
 
 ### 1. `createRefsStore()`
 
@@ -44,86 +78,8 @@ const ref = useRegisterRef(refsStore, 'unique-key');
 return <div ref={ref}>...</div>;
 ```
 
-## 사용 예시
+## 💡 사용 예시
 
 ### 기본 사용법
 
-```tsx
-// 1. Store 생성
-const TabRefsStore = createRefsStore<HTMLButtonElement>();
-
-// 2. Provider로 감싸기
-export function TabGroup({ children }) {
-  return (
-    <TabRefsStore.Provider>
-      {children}
-    </TabRefsStore.Provider>
-  );
-}
-
-// 3. 자식 컴포넌트에서 등록
-function Tab({ id, children }) {
-  const store = TabRefsStore.useStore();
-  const ref = useRegisterRef(store, id);
-  
-  return <button ref={ref}>{children}</button>;
-}
-
-// 4. Store 사용
-function TabIndicator({ activeTabId }) {
-  const store = TabRefsStore.useStore();
-  const activeTab = store.get(activeTabId);
-  
-  if (!activeTab) return null;
-  
-  const rect = activeTab.getBoundingClientRect();
-  // 위치 계산 후 인디케이터 렌더링...
-}
 ```
-
-### 선택적 사용 (Provider 밖에서)
-
-```tsx
-// Provider 밖에서도 사용 가능하게 하려면
-const store = TabRefsStore.useStore({ optional: true });
-// store가 null일 수 있음을 체크해야 함
-if (store) {
-  const element = store.get('tab-1');
-}
-```
-
-### 직접 Store 생성
-
-Context 없이 단독으로 사용하는 경우:
-
-```tsx
-function StandaloneComponent() {
-  const refsStore = useRefsStore();
-  
-  // Map API 사용
-  const buttonRef = refsStore.get('button-1');
-  const hasTab = refsStore.has('tab-1');
-  
-  return <ChildComponent refsStore={refsStore} />;
-}
-```
-
-## Store API (RefsMap)
-
-```tsx
-interface RefsMap<T extends HTMLElement> {
-  register(key: string, element: T | null): void;   // 요소 등록
-  unregister(key: string): void;                     // 요소 해제
-  get(key: string): T | null;                        // 요소 가져오기
-  getAll(): Map<string, T>;                          // 모든 요소 가져오기
-  has(key: string): boolean;                         // 요소 존재 확인
-  clear(): void;                                     // 모든 요소 제거
-}
-```
-
-## 패턴 선택 가이드
-
-- **Context가 필요한 경우**: `createRefsStore()` 사용
-- **Context 없이 local하게 사용**: `useRefsStore()` 사용
-- **Provider 내부에서만 사용**: `useStore()`
-- **Provider 내외부 모두에서 사용**: `useStore({ optional: true })` 

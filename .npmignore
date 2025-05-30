@@ -1,0 +1,40 @@
+# Source files
+src/
+*.ts
+!*.d.ts
+
+# Config files
+tsconfig.json
+tsup.config.ts
+jest.config.js
+.gitignore
+
+# Development files
+node_modules/
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
+
+# Build files
+build.ts
+
+# Editor directories
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.github/
+
+# Documentation
+README.md
+
+# Test files
+__tests__/
+*.test.ts
+*.spec.ts
+coverage/ 

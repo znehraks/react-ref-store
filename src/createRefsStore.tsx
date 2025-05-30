@@ -1,6 +1,4 @@
-import React from 'react';
-import type { ReactNode } from 'react';
-import { createContext, useContext } from 'react';
+import { type ReactNode, createContext, useContext } from 'react';
 
 import { useRefsStore, type RefsMap } from './useRefsStore';
 
