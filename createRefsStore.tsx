@@ -1,3 +1,4 @@
+import React from 'react';
 import type { ReactNode } from 'react';
 import { createContext, useContext } from 'react';
 
@@ -32,7 +33,7 @@ export function createRefsStore<T extends HTMLElement = HTMLElement>() {
   const Context = createContext<RefsMap<T> | null>(null);
 
   function Provider({ children, refsStore: externalRefsStore }: { children: ReactNode; refsStore?: RefsMap<T> }) {
-    // 외부에서 주입된 refsStore가 없으면 내부에서 생성
+
     const internalRefsStore = useRefsStore<T>();
     const refsStore = externalRefsStore || internalRefsStore;
 
@@ -52,8 +53,5 @@ export function createRefsStore<T extends HTMLElement = HTMLElement>() {
   return {
     Provider,
     useStore,
-    // Context는 내부 구현이므로 노출하지 않음
-    // 만약 Providers 통합이 필요하다면, Provider를 직접 사용하거나
-    // 별도의 통합 방법을 고려하세요
   };
 }

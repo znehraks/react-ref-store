@@ -1,4 +1,4 @@
-# DOM Registry
+# Refs Store
 
 React에서 querySelector 대신 ref를 통해 DOM 요소를 관리하는 유틸리티입니다.
 
@@ -10,38 +10,37 @@ React에서 querySelector 대신 ref를 통해 DOM 요소를 관리하는 유틸
 
 ## API
 
-### 1. `createDOMRegistry()`
+### 1. `createRefsStore()`
 
-관련된 모든 기능을 한 번에 생성하는 팩토리 함수입니다.
+Context와 Provider, Hook을 한 번에 생성하는 팩토리 함수입니다.
 
 ```tsx
-const TabRegistry = createDOMRegistry<HTMLButtonElement>();
+const TabRefsStore = createRefsStore<HTMLButtonElement>();
 
 // 반환값
 {
-  Provider,    // Context Provider
-  useRegistry, // Registry를 가져오는 Hook
-  Context,     // React Context (Providers 통합용)
+  Provider,  // Context Provider 컴포넌트
+  useStore,  // Store를 가져오는 Hook
 }
 ```
 
-### 2. `useRefsMap()`
+### 2. `useRefsStore()`
 
-ref들을 Map으로 관리하는 Registry를 생성합니다. (Context 없이)
+ref들을 Map 자료구조로 관리하는 Store를 생성합니다. (Context 없이 단독 사용)
 
 ```tsx
 function MyComponent() {
-  const refsMap = useRefsMap<HTMLDivElement>();
-  // Map처럼 사용: refsMap.get(), refsMap.has() 등
+  const refsStore = useRefsStore<HTMLDivElement>();
+  // Map API 사용: refsStore.get(), refsStore.has() 등
 }
 ```
 
 ### 3. `useRegisterRef()`
 
-DOM 요소의 ref를 Registry에 등록하는 Hook입니다.
+DOM 요소의 ref를 Store에 등록하는 Hook입니다.
 
 ```tsx
-const ref = useRegisterRef(refsMap, 'unique-key');
+const ref = useRegisterRef(refsStore, 'unique-key');
 return <div ref={ref}>...</div>;
 ```
 
@@ -50,30 +49,30 @@ return <div ref={ref}>...</div>;
 ### 기본 사용법
 
 ```tsx
-// 1. Registry 생성
-const TabRegistry = createDOMRegistry<HTMLButtonElement>();
+// 1. Store 생성
+const TabRefsStore = createRefsStore<HTMLButtonElement>();
 
 // 2. Provider로 감싸기
 export function TabGroup({ children }) {
   return (
-    <TabRegistry.Provider>
+    <TabRefsStore.Provider>
       {children}
-    </TabRegistry.Provider>
+    </TabRefsStore.Provider>
   );
 }
 
 // 3. 자식 컴포넌트에서 등록
 function Tab({ id, children }) {
-  const registry = TabRegistry.useRegistry();
-  const ref = useRegisterRef(registry, id);
+  const store = TabRefsStore.useStore();
+  const ref = useRegisterRef(store, id);
   
   return <button ref={ref}>{children}</button>;
 }
 
-// 4. Registry 사용
+// 4. Store 사용
 function TabIndicator({ activeTabId }) {
-  const registry = TabRegistry.useRegistry();
-  const activeTab = registry.get(activeTabId);
+  const store = TabRefsStore.useStore();
+  const activeTab = store.get(activeTabId);
   
   if (!activeTab) return null;
   
@@ -86,29 +85,45 @@ function TabIndicator({ activeTabId }) {
 
 ```tsx
 // Provider 밖에서도 사용 가능하게 하려면
-const registry = TabRegistry.useRegistry({ optional: true });
-// registry가 null일 수 있음을 체크해야 함
+const store = TabRefsStore.useStore({ optional: true });
+// store가 null일 수 있음을 체크해야 함
+if (store) {
+  const element = store.get('tab-1');
+}
 ```
 
-### 직접 Registry 생성
+### 직접 Store 생성
 
 Context 없이 단독으로 사용하는 경우:
 
 ```tsx
 function StandaloneComponent() {
-  const refsMap = useRefsMap();
+  const refsStore = useRefsStore();
   
   // Map API 사용
-  const buttonRef = refsMap.get('button-1');
-  const hasTab = refsMap.has('tab-1');
+  const buttonRef = refsStore.get('button-1');
+  const hasTab = refsStore.has('tab-1');
   
-  return <ChildComponent refsMap={refsMap} />;
+  return <ChildComponent refsStore={refsStore} />;
+}
+```
+
+## Store API (RefsMap)
+
+```tsx
+interface RefsMap<T extends HTMLElement> {
+  register(key: string, element: T | null): void;   // 요소 등록
+  unregister(key: string): void;                     // 요소 해제
+  get(key: string): T | null;                        // 요소 가져오기
+  getAll(): Map<string, T>;                          // 모든 요소 가져오기
+  has(key: string): boolean;                         // 요소 존재 확인
+  clear(): void;                                     // 모든 요소 제거
 }
 ```
 
 ## 패턴 선택 가이드
 
-- **Context가 필요한 경우**: `createDOMRegistry()` 사용
-- **Context 없이 local하게 사용**: `useRefsMap()` 사용
-- **Provider 내부에서만 사용**: `useRegistry()`
-- **Provider 내외부 모두에서 사용**: `useRegistry({ optional: true })` 
+- **Context가 필요한 경우**: `createRefsStore()` 사용
+- **Context 없이 local하게 사용**: `useRefsStore()` 사용
+- **Provider 내부에서만 사용**: `useStore()`
+- **Provider 내외부 모두에서 사용**: `useStore({ optional: true })` 
