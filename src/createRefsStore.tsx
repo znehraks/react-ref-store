@@ -31,20 +31,14 @@ export function createRefsStore<T extends HTMLElement = HTMLElement>() {
   const Context = createContext<RefsMap<T> | null>(null);
 
   function Provider({ children, refsStore: externalRefsStore }: { children: ReactNode; refsStore?: RefsMap<T> }) {
-
     const internalRefsStore = useRefsStore<T>();
     const refsStore = externalRefsStore || internalRefsStore;
 
     return <Context.Provider value={refsStore}>{children}</Context.Provider>;
   }
 
-  function useStore(options?: { optional?: boolean }) {
-    const refsStore = useContext(Context);
-
-    if (!refsStore && !options?.optional) {
-      throw new Error('useStore must be used within a RefsStore.Provider. If you want to use it outside, pass { optional: true } option.');
-    }
-
+  function useStore() {
+    const refsStore = useContext(Context)!;
     return refsStore;
   }
 
