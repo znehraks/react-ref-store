@@ -4,7 +4,6 @@ export interface RefsMap<T extends HTMLElement = HTMLElement> {
   register: (key: string, element: T | null) => void;
   unregister: (key: string) => void;
   get: (key: string) => T | null;
-  getAll: () => Map<string, T>;
   has: (key: string) => boolean;
   clear: () => void;
 }
@@ -38,10 +37,6 @@ export function useRefsStore<T extends HTMLElement = HTMLElement>(): RefsMap<T> 
     return elementsMap.current.get(key) || null;
   }, []);
 
-  const getAll = useCallback(() => {
-    return new Map(elementsMap.current);
-  }, []);
-
   const has = useCallback((key: string) => {
     return elementsMap.current.has(key);
   }, []);
@@ -54,7 +49,6 @@ export function useRefsStore<T extends HTMLElement = HTMLElement>(): RefsMap<T> 
     register,
     unregister,
     get,
-    getAll,
     has,
     clear,
   };
