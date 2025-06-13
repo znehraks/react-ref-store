@@ -54,7 +54,7 @@ const TabRefsStore = createRefsStore<HTMLButtonElement>();
 // Returns
 {
   Provider,  // Context Provider component
-  useStore,  // Hook to get the store
+  useStore,  // Hook to get the store (must be used within Provider)
 }
 ```
 
@@ -88,18 +88,14 @@ const TabRefsStore = createRefsStore<HTMLButtonElement>();
 
 // 2. Wrap with Provider
 export function TabGroup({ children }) {
-  return (
-    <TabRefsStore.Provider>
-      {children}
-    </TabRefsStore.Provider>
-  );
+  return <TabRefsStore.Provider>{children}</TabRefsStore.Provider>;
 }
 
 // 3. Register in child components
 function Tab({ id, children }) {
   const store = TabRefsStore.useStore();
   const ref = useRegisterRef(store, id);
-  
+
   return <button ref={ref}>{children}</button>;
 }
 
@@ -107,22 +103,11 @@ function Tab({ id, children }) {
 function TabIndicator({ activeTabId }) {
   const store = TabRefsStore.useStore();
   const activeTab = store.get(activeTabId);
-  
+
   if (!activeTab) return null;
-  
+
   const rect = activeTab.getBoundingClientRect();
   // Calculate position and render indicator...
-}
-```
-
-### Optional Usage (Outside Provider)
-
-```tsx
-// To use outside Provider
-const store = TabRefsStore.useStore({ optional: true });
-// Need to check if store is null
-if (store) {
-  const element = store.get('tab-1');
 }
 ```
 
@@ -133,11 +118,11 @@ When using standalone without Context:
 ```tsx
 function StandaloneComponent() {
   const refsStore = useRefsStore();
-  
+
   // Use Map API
   const buttonRef = refsStore.get('button-1');
   const hasTab = refsStore.has('tab-1');
-  
+
   return <ChildComponent refsStore={refsStore} />;
 }
 ```
@@ -146,12 +131,11 @@ function StandaloneComponent() {
 
 ```tsx
 interface RefsMap<T extends HTMLElement> {
-  register(key: string, element: T | null): void;   // Register element
-  unregister(key: string): void;                     // Unregister element
-  get(key: string): T | null;                        // Get element
-  getAll(): Map<string, T>;                          // Get all elements
-  has(key: string): boolean;                         // Check if element exists
-  clear(): void;                                     // Remove all elements
+  register(key: string, element: T | null): void; // Register element
+  unregister(key: string): void; // Unregister element
+  get(key: string): T | null; // Get element
+  has(key: string): boolean; // Check if element exists
+  clear(): void; // Remove all elements
 }
 ```
 
@@ -159,8 +143,7 @@ interface RefsMap<T extends HTMLElement> {
 
 - **When Context is needed**: Use `createRefsStore()`
 - **For local usage without Context**: Use `useRefsStore()`
-- **Use only inside Provider**: `useStore()`
-- **Use both inside and outside Provider**: `useStore({ optional: true })`
+- **Must be used inside Provider**: `useStore()` (throws error if used outside Provider)
 
 ## 📄 License
 

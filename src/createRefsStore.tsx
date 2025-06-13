@@ -38,7 +38,12 @@ export function createRefsStore<T extends HTMLElement = HTMLElement>() {
   }
 
   function useStore() {
-    const refsStore = useContext(Context)!;
+    const refsStore = useContext(Context);
+
+    if (!refsStore) {
+      throw new Error('useStore must be used within a RefsStore.Provider');
+    }
+
     return refsStore;
   }
 
