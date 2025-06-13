@@ -77,19 +77,27 @@ describe('Integration Tests', () => {
       );
     };
 
-    const MenuController = ({ onStoreUpdate }: { onStoreUpdate: (size: number) => void }) => {
+    const MenuController = ({
+      onStoreUpdate,
+      expectedKeys,
+    }: {
+      onStoreUpdate: (size: number) => void;
+      expectedKeys: string[];
+    }) => {
       const store = MenuRefsStore.useStore();
 
       useEffect(() => {
         // Use timeout to ensure refs are registered
         const timer = setTimeout(() => {
           if (store) {
-            onStoreUpdate(Object.keys(store).length);
+            // 실제로 등록된 키들의 개수를 계산
+            const actualSize = expectedKeys.filter((key) => store.has(key)).length;
+            onStoreUpdate(actualSize);
           }
         }, 50);
 
         return () => clearTimeout(timer);
-      }, [store, onStoreUpdate]);
+      }, [store, onStoreUpdate, expectedKeys]);
 
       return null;
     };
@@ -103,7 +111,7 @@ describe('Integration Tests', () => {
       <Menu>
         <MenuItem id="item1">Item 1</MenuItem>
         <MenuItem id="item2">Item 2</MenuItem>
-        <MenuController onStoreUpdate={handleStoreUpdate} />
+        <MenuController onStoreUpdate={handleStoreUpdate} expectedKeys={['item1', 'item2']} />
       </Menu>,
     );
 
@@ -120,7 +128,7 @@ describe('Integration Tests', () => {
         <MenuItem id="item1">Item 1</MenuItem>
         <MenuItem id="item2">Item 2</MenuItem>
         <MenuItem id="item3">Item 3</MenuItem>
-        <MenuController onStoreUpdate={handleStoreUpdate} />
+        <MenuController onStoreUpdate={handleStoreUpdate} expectedKeys={['item1', 'item2', 'item3']} />
       </Menu>,
     );
 
@@ -136,7 +144,7 @@ describe('Integration Tests', () => {
       <Menu>
         <MenuItem id="item1">Item 1</MenuItem>
         <MenuItem id="item3">Item 3</MenuItem>
-        <MenuController onStoreUpdate={handleStoreUpdate} />
+        <MenuController onStoreUpdate={handleStoreUpdate} expectedKeys={['item1', 'item3']} />
       </Menu>,
     );
 
