@@ -13,4 +13,4 @@ globalThis.requestAnimationFrame = (callback: FrameRequestCallback): number => {
 
 globalThis.cancelAnimationFrame = (id: number): void => {
   clearTimeout(id);
-}; 
+};

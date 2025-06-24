@@ -40,16 +40,23 @@ yarn add react-ref-store
 
 - When parent components need to access DOM elements of child components
 - When you want to manage DOM in a React-friendly way without using querySelector
+- When you need type-safe access to different DOM element types
 - Examples: tabs, menus, animation indicators, etc.
 
 ## 📖 API
 
-### 1. `createRefsStore()`
+### 1. `createRefsStore<T>()`
 
-A factory function that creates Context, Provider, and Hook all at once.
+A factory function that creates Context, Provider, and Hook all at once with type safety.
 
 ```tsx
-const TabRefsStore = createRefsStore<HTMLButtonElement>();
+// Define your refs type
+type TabRefs = {
+  'tab-button': HTMLButtonElement;
+  'tab-panel': HTMLDivElement;
+};
+
+const TabRefsStore = createRefsStore<TabRefs>();
 
 // Returns
 {
@@ -58,20 +65,25 @@ const TabRefsStore = createRefsStore<HTMLButtonElement>();
 }
 ```
 
-### 2. `useRefsStore()`
+### 2. `useRefsStore<T>()`
 
-Creates a store that manages refs as a Map data structure. (Can be used standalone without Context)
+Creates a store that manages refs as a Map data structure with type safety. (Can be used standalone without Context)
 
 ```tsx
+type SearchRefs = {
+  'search-field': HTMLDivElement;
+  'search-input': HTMLInputElement;
+};
+
 function MyComponent() {
-  const refsStore = useRefsStore<HTMLDivElement>();
+  const refsStore = useRefsStore<SearchRefs>();
   // Use Map API: refsStore.get(), refsStore.has(), etc.
 }
 ```
 
-### 3. `useRegisterRef()`
+### 3. `useRegisterRef<T, K>()`
 
-A hook that registers a DOM element's ref to the Store.
+A hook that registers a DOM element's ref to the Store with type safety.
 
 ```tsx
 const ref = useRegisterRef(refsStore, 'unique-key');
@@ -80,34 +92,53 @@ return <div ref={ref}>...</div>;
 
 ## 💡 Usage Examples
 
-### Basic Usage
+### Basic Usage with Type Safety
 
 ```tsx
-// 1. Create Store
-const TabRefsStore = createRefsStore<HTMLButtonElement>();
+// 1. Define your refs type
+type TabRefs = {
+  'tab-button': HTMLButtonElement;
+  'tab-panel': HTMLDivElement;
+};
 
-// 2. Wrap with Provider
+// 2. Create Store
+const TabRefsStore = createRefsStore<TabRefs>();
+
+// 3. Wrap with Provider
 export function TabGroup({ children }) {
   return <TabRefsStore.Provider>{children}</TabRefsStore.Provider>;
 }
 
-// 3. Register in child components
+// 4. Register in child components
 function Tab({ id, children }) {
   const store = TabRefsStore.useStore();
-  const ref = useRegisterRef(store, id);
-
+  const ref = useRegisterRef(store, id); // TypeScript infers correct element type
+  
   return <button ref={ref}>{children}</button>;
 }
 
-// 4. Use the Store
+// 5. Use the Store
 function TabIndicator({ activeTabId }) {
   const store = TabRefsStore.useStore();
-  const activeTab = store.get(activeTabId);
-
+  const activeTab = store.get(activeTabId); // Returns HTMLButtonElement | undefined
+  
   if (!activeTab) return null;
 
   const rect = activeTab.getBoundingClientRect();
   // Calculate position and render indicator...
+}
+```
+
+### External Store Injection
+
+```tsx
+// You can inject an external store into the Provider
+function CustomTabGroup({ children, externalStore }) {
+  return (
+    <TabRefsStore.Provider refsStore={externalStore}>
+      {children}
+    </TabRefsStore.Provider>
+  );
 }
 ```
 
@@ -116,34 +147,93 @@ function TabIndicator({ activeTabId }) {
 When using standalone without Context:
 
 ```tsx
+type FormRefs = {
+  'submit-btn': HTMLButtonElement;
+  'email-input': HTMLInputElement;
+};
+
 function StandaloneComponent() {
-  const refsStore = useRefsStore();
-
-  // Use Map API
-  const buttonRef = refsStore.get('button-1');
-  const hasTab = refsStore.has('tab-1');
-
+  const refsStore = useRefsStore<FormRefs>();
+  
+  // Use Map API with type safety
+  const buttonRef = refsStore.get('submit-btn'); // HTMLButtonElement | undefined
+  const hasInput = refsStore.has('email-input'); // boolean
+  
   return <ChildComponent refsStore={refsStore} />;
+}
+```
+
+### Advanced Type Safety
+
+```tsx
+// Different element types for different keys
+type ComplexRefs = {
+  'header': HTMLHeaderElement;
+  'nav': HTMLNavElement;
+  'main-content': HTMLMainElement;
+  'footer': HTMLFooterElement;
+  'submit-button': HTMLButtonElement;
+  'search-input': HTMLInputElement;
+};
+
+const LayoutStore = createRefsStore<ComplexRefs>();
+
+function Header() {
+  const store = LayoutStore.useStore();
+  const ref = useRegisterRef(store, 'header'); // RefObject<HTMLHeaderElement>
+  return <header ref={ref}>Header</header>;
+}
+
+function SearchBar() {
+  const store = LayoutStore.useStore();
+  const ref = useRegisterRef(store, 'search-input'); // RefObject<HTMLInputElement>
+  return <input ref={ref} type="search" />;
 }
 ```
 
 ## Store API (RefsMap)
 
 ```tsx
-interface RefsMap<T extends HTMLElement> {
-  register(key: string, element: T | null): void; // Register element
-  unregister(key: string): void; // Unregister element
-  get(key: string): T | null; // Get element
-  has(key: string): boolean; // Check if element exists
-  clear(): void; // Remove all elements
+interface RefsMap<T extends Record<string, HTMLElement>> {
+  register<K extends keyof T>(key: K, element: T[K] | undefined): void;   // Register element
+  unregister<K extends keyof T>(key: K): void;                             // Unregister element
+  get<K extends keyof T>(key: K): T[K] | undefined;                        // Get element
+  has<K extends keyof T>(key: K): boolean;                                 // Check if element exists
+  clear(): void;                                                           // Remove all elements
+}
+```
+
+## Provider API
+
+```tsx
+interface ProviderProps<T extends Record<string, HTMLElement>> {
+  children: ReactNode;
+  refsStore?: RefsMap<T>; // Optional external store injection
+}
+```
+
+## useRegisterRef Options
+
+```tsx
+interface UseRegisterRefOptions {
+  isDefer?: boolean;   // Defer registration using requestAnimationFrame (default: true)
+  isEnabled?: boolean; // Enable/disable registration (default: true)
 }
 ```
 
 ## Pattern Selection Guide
 
-- **When Context is needed**: Use `createRefsStore()`
-- **For local usage without Context**: Use `useRefsStore()`
-- **Must be used inside Provider**: `useStore()` (throws error if used outside Provider)
+- **When Context is needed**: Use `createRefsStore<T>()`
+- **For local usage without Context**: Use `useRefsStore<T>()`
+- **Use only inside Provider**: `useStore()`
+- **Need external store control**: Pass `refsStore` prop to Provider
+
+## Type Safety Benefits
+
+- **Key validation**: TypeScript ensures you only use valid keys
+- **Element type inference**: Each key maps to the correct DOM element type
+- **Method type safety**: All store methods are properly typed
+- **Ref type safety**: `useRegisterRef` returns the correct ref type for each key
 
 ## 📄 License
 

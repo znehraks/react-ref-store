@@ -3,15 +3,33 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { createRefsStore } from '../createRefsStore';
 import { useRegisterRef } from '../useRegisterRef';
 
+// 테스트용 타입 정의
+type TabRefs = {
+  tab1: HTMLButtonElement;
+  tab2: HTMLButtonElement;
+  tab3: HTMLButtonElement;
+};
+
+type MenuRefs = {
+  item1: HTMLDivElement;
+  item2: HTMLDivElement;
+  item3: HTMLDivElement;
+};
+
+type FormRefs = {
+  'submit-btn': HTMLButtonElement;
+  'email-input': HTMLInputElement;
+};
+
 describe('Integration Tests', () => {
   it('should work with real React components', async () => {
-    const TabRefsStore = createRefsStore<HTMLButtonElement>();
+    const TabRefsStore = createRefsStore<TabRefs>();
 
     const TabGroup = ({ children }: { children: React.ReactNode }) => {
       return <TabRefsStore.Provider>{children}</TabRefsStore.Provider>;
     };
 
-    const Tab = ({ id, children }: { id: string; children: React.ReactNode }) => {
+    const Tab = ({ id, children }: { id: keyof TabRefs; children: React.ReactNode }) => {
       const store = TabRefsStore.useStore();
       const ref = useRegisterRef(store, id);
 
@@ -60,13 +78,13 @@ describe('Integration Tests', () => {
   });
 
   it('should handle dynamic component mounting and unmounting', async () => {
-    const MenuRefsStore = createRefsStore<HTMLDivElement>();
+    const MenuRefsStore = createRefsStore<MenuRefs>();
 
     const Menu = ({ children }: { children: React.ReactNode }) => {
       return <MenuRefsStore.Provider>{children}</MenuRefsStore.Provider>;
     };
 
-    const MenuItem = ({ id, children }: { id: string; children: React.ReactNode }) => {
+    const MenuItem = ({ id, children }: { id: keyof MenuRefs; children: React.ReactNode }) => {
       const store = MenuRefsStore.useStore();
       const ref = useRegisterRef(store, id);
 
@@ -90,9 +108,12 @@ describe('Integration Tests', () => {
         // Use timeout to ensure refs are registered
         const timer = setTimeout(() => {
           if (store) {
-            // 실제로 등록된 키들의 개수를 계산
-            const actualSize = expectedKeys.filter((key) => store.has(key)).length;
-            onStoreUpdate(actualSize);
+            // Count registered items manually since getAll() is removed
+            let count = 0;
+            if (store.has('item1')) count++;
+            if (store.has('item2')) count++;
+            if (store.has('item3')) count++;
+            onStoreUpdate(count);
           }
         }, 50);
 
@@ -157,8 +178,8 @@ describe('Integration Tests', () => {
   });
 
   it('should support multiple stores simultaneously', async () => {
-    const ButtonStore = createRefsStore<HTMLButtonElement>();
-    const InputStore = createRefsStore<HTMLInputElement>();
+    const ButtonStore = createRefsStore<{ 'submit-btn': HTMLButtonElement }>();
+    const InputStore = createRefsStore<{ 'email-input': HTMLInputElement }>();
 
     const App = () => {
       const buttonStore = ButtonStore.useStore();
@@ -204,5 +225,36 @@ describe('Integration Tests', () => {
       },
       { timeout: 500 },
     );
+  });
+
+  it('should handle store access outside Provider', () => {
+    const TestStore = createRefsStore<{ 'test-div': HTMLDivElement }>();
+
+    const OutsideComponent = () => {
+      try {
+        TestStore.useStore();
+        return <div data-testid="outside">Store is available</div>;
+      } catch (error) {
+        return <div data-testid="outside">Store is not available</div>;
+      }
+    };
+
+    const InsideComponent = () => {
+      const store = TestStore.useStore();
+
+      return <div data-testid="inside">Store is {store ? 'available' : 'not available'}</div>;
+    };
+
+    render(
+      <>
+        <OutsideComponent />
+        <TestStore.Provider>
+          <InsideComponent />
+        </TestStore.Provider>
+      </>,
+    );
+
+    expect(screen.getByTestId('outside').textContent).toBe('Store is not available');
+    expect(screen.getByTestId('inside').textContent).toBe('Store is available');
   });
 });
