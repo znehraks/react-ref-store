@@ -12,14 +12,14 @@ type TestRefs = {
 describe('createRefsStore', () => {
   it('should create a store with Provider and useStore', () => {
     const TestStore = createRefsStore<TestRefs>();
-    
+
     expect(TestStore).toHaveProperty('Provider');
     expect(TestStore).toHaveProperty('useStore');
   });
 
   it('should provide store to children components', () => {
     const TestStore = createRefsStore<TestRefs>();
-    
+
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <TestStore.Provider>{children}</TestStore.Provider>
     );
@@ -36,7 +36,7 @@ describe('createRefsStore', () => {
 
   it('should throw error when useStore is called outside Provider', () => {
     const TestStore = createRefsStore<TestRefs>();
-    
+
     const { result } = renderHook(() => {
       try {
         return TestStore.useStore();
@@ -65,7 +65,7 @@ describe('createRefsStore', () => {
 
   it('should create internal store when external store is not provided', () => {
     const TestStore = createRefsStore<TestRefs>();
-    
+
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <TestStore.Provider>{children}</TestStore.Provider>
     );
@@ -79,7 +79,7 @@ describe('createRefsStore', () => {
   it('should support nested providers with different stores', () => {
     const OuterStore = createRefsStore<{ 'outer-div': HTMLDivElement }>();
     const InnerStore = createRefsStore<{ 'inner-button': HTMLButtonElement }>();
-    
+
     let outerStoreRef: any;
     let innerStoreRef: any;
 
@@ -157,7 +157,7 @@ describe('createRefsStore', () => {
     expect(firstStore.has('test-button')).toBe(true);
     expect(secondStore.has('test-button')).toBe(true);
     expect(firstStore.get('test-button')).toBe(secondStore.get('test-button'));
-    
+
     // Check if methods are the same references
     expect(firstStore.register).toBe(secondStore.register);
     expect(firstStore.get).toBe(secondStore.get);

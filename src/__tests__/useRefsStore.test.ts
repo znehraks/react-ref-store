@@ -4,15 +4,15 @@ import { useRefsStore } from '../useRefsStore';
 // 테스트용 타입 정의
 type TestRefs = {
   'test-key': HTMLDivElement;
-  'key1': HTMLDivElement;
-  'key2': HTMLDivElement;
+  key1: HTMLDivElement;
+  key2: HTMLDivElement;
   'non-existent': HTMLDivElement;
 };
 
 describe('useRefsStore', () => {
   it('should initialize with empty map', () => {
     const { result } = renderHook(() => useRefsStore<TestRefs>());
-    
+
     expect(result.current.has('test-key')).toBe(false);
     expect(result.current.get('test-key')).toBeUndefined();
   });
@@ -74,14 +74,14 @@ describe('useRefsStore', () => {
       result.current.register('key1', element1);
       result.current.register('key2', element2);
     });
-    
+
     expect(result.current.has('key1')).toBe(true);
     expect(result.current.has('key2')).toBe(true);
-    
+
     act(() => {
       result.current.clear();
     });
-    
+
     expect(result.current.has('key1')).toBe(false);
     expect(result.current.has('key2')).toBe(false);
     expect(result.current.get('key1')).toBeUndefined();
@@ -90,13 +90,13 @@ describe('useRefsStore', () => {
 
   it('should return undefined for non-existent keys', () => {
     const { result } = renderHook(() => useRefsStore<TestRefs>());
-    
+
     expect(result.current.get('non-existent')).toBeUndefined();
   });
 
   it('should maintain stable function references', () => {
     const { result, rerender } = renderHook(() => useRefsStore<TestRefs>());
-    
+
     const firstRender = {
       register: result.current.register,
       unregister: result.current.unregister,
@@ -117,17 +117,17 @@ describe('useRefsStore', () => {
   it('should support type-safe key access', () => {
     const { result } = renderHook(() => useRefsStore<TestRefs>());
     const element = document.createElement('div');
-    
+
     act(() => {
       result.current.register('test-key', element);
     });
-    
+
     // TypeScript should infer the correct return type
     const retrievedElement = result.current.get('test-key');
     expect(retrievedElement).toBe(element);
-    
+
     // Should be undefined for non-existent key
     const nonExistentElement = result.current.get('non-existent');
     expect(nonExistentElement).toBeUndefined();
   });
-}); 
+});
