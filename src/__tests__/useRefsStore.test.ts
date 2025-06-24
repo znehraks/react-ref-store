@@ -20,11 +20,11 @@ describe('useRefsStore', () => {
   it('should register and retrieve elements', () => {
     const { result } = renderHook(() => useRefsStore<TestRefs>());
     const element = document.createElement('div');
-    
+
     act(() => {
       result.current.register('test-key', element);
     });
-    
+
     expect(result.current.get('test-key')).toBe(element);
     expect(result.current.has('test-key')).toBe(true);
   });
@@ -32,17 +32,17 @@ describe('useRefsStore', () => {
   it('should unregister elements', () => {
     const { result } = renderHook(() => useRefsStore<TestRefs>());
     const element = document.createElement('div');
-    
+
     act(() => {
       result.current.register('test-key', element);
     });
-    
+
     expect(result.current.has('test-key')).toBe(true);
-    
+
     act(() => {
       result.current.unregister('test-key');
     });
-    
+
     expect(result.current.has('test-key')).toBe(false);
     expect(result.current.get('test-key')).toBeUndefined();
   });
@@ -50,17 +50,17 @@ describe('useRefsStore', () => {
   it('should handle null elements in register', () => {
     const { result } = renderHook(() => useRefsStore<TestRefs>());
     const element = document.createElement('div');
-    
+
     act(() => {
       result.current.register('test-key', element);
     });
-    
+
     expect(result.current.has('test-key')).toBe(true);
-    
+
     act(() => {
       result.current.register('test-key', undefined);
     });
-    
+
     expect(result.current.has('test-key')).toBe(false);
   });
 
@@ -68,7 +68,8 @@ describe('useRefsStore', () => {
     const { result } = renderHook(() => useRefsStore<TestRefs>());
     const element1 = document.createElement('div');
     const element2 = document.createElement('div');
-    
+    const registeredKeys = ['key1', 'key2'];
+
     act(() => {
       result.current.register('key1', element1);
       result.current.register('key2', element2);
@@ -103,9 +104,9 @@ describe('useRefsStore', () => {
       has: result.current.has,
       clear: result.current.clear,
     };
-    
+
     rerender();
-    
+
     expect(result.current.register).toBe(firstRender.register);
     expect(result.current.unregister).toBe(firstRender.unregister);
     expect(result.current.get).toBe(firstRender.get);

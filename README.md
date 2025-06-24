@@ -61,7 +61,7 @@ const TabRefsStore = createRefsStore<TabRefs>();
 // Returns
 {
   Provider,  // Context Provider component
-  useStore,  // Hook to get the store
+  useStore,  // Hook to get the store (must be used within Provider)
 }
 ```
 
@@ -106,11 +106,7 @@ const TabRefsStore = createRefsStore<TabRefs>();
 
 // 3. Wrap with Provider
 export function TabGroup({ children }) {
-  return (
-    <TabRefsStore.Provider>
-      {children}
-    </TabRefsStore.Provider>
-  );
+  return <TabRefsStore.Provider>{children}</TabRefsStore.Provider>;
 }
 
 // 4. Register in child components
@@ -127,7 +123,7 @@ function TabIndicator({ activeTabId }) {
   const activeTab = store.get(activeTabId); // Returns HTMLButtonElement | undefined
   
   if (!activeTab) return null;
-  
+
   const rect = activeTab.getBoundingClientRect();
   // Calculate position and render indicator...
 }

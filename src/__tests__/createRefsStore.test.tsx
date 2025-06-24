@@ -23,9 +23,9 @@ describe('createRefsStore', () => {
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <TestStore.Provider>{children}</TestStore.Provider>
     );
-    
+
     const { result } = renderHook(() => TestStore.useStore(), { wrapper });
-    
+
     expect(result.current).toBeDefined();
     expect(result.current).toHaveProperty('register');
     expect(result.current).toHaveProperty('unregister');
@@ -44,7 +44,7 @@ describe('createRefsStore', () => {
         return error;
       }
     });
-    
+
     expect(result.current).toBeInstanceOf(Error);
     expect((result.current as Error).message).toContain('useStore must be used within a RefsStore.Provider');
   });
@@ -53,13 +53,13 @@ describe('createRefsStore', () => {
     const TestStore = createRefsStore<TestRefs>();
     const { result: externalStoreResult } = renderHook(() => useRefsStore<TestRefs>());
     const externalStore = externalStoreResult.current;
-    
+
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <TestStore.Provider refsStore={externalStore}>{children}</TestStore.Provider>
     );
-    
+
     const { result } = renderHook(() => TestStore.useStore(), { wrapper });
-    
+
     expect(result.current).toBe(externalStore);
   });
 
@@ -69,9 +69,9 @@ describe('createRefsStore', () => {
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <TestStore.Provider>{children}</TestStore.Provider>
     );
-    
+
     const { result } = renderHook(() => TestStore.useStore(), { wrapper });
-    
+
     expect(result.current).toBeDefined();
     expect(result.current?.has('tab-button')).toBe(false);
   });
@@ -82,30 +82,30 @@ describe('createRefsStore', () => {
     
     let outerStoreRef: any;
     let innerStoreRef: any;
-    
+
     const TestComponent = () => {
       const outerStore = OuterStore.useStore();
       outerStoreRef = outerStore;
-      
+
       return (
         <InnerStore.Provider>
           <InnerComponent />
         </InnerStore.Provider>
       );
     };
-    
+
     const InnerComponent = () => {
       const innerStore = InnerStore.useStore();
       innerStoreRef = innerStore;
       return null;
     };
-    
+
     render(
       <OuterStore.Provider>
         <TestComponent />
-      </OuterStore.Provider>
+      </OuterStore.Provider>,
     );
-    
+
     expect(outerStoreRef).toBeDefined();
     expect(innerStoreRef).toBeDefined();
     expect(outerStoreRef).not.toBe(innerStoreRef);
@@ -115,19 +115,23 @@ describe('createRefsStore', () => {
     const TestStore = createRefsStore<{ 'test-button': HTMLButtonElement }>();
     let firstStore: any = null;
     let secondStore: any = null;
-    
+
     const TestComponent = ({ captureStore }: { captureStore: (store: any) => void }) => {
       const store = TestStore.useStore();
       captureStore(store);
       return null;
     };
-    
+
     const { rerender } = render(
       <TestStore.Provider>
-        <TestComponent captureStore={(store) => { firstStore = store; }} />
-      </TestStore.Provider>
+        <TestComponent
+          captureStore={(store) => {
+            firstStore = store;
+          }}
+        />
+      </TestStore.Provider>,
     );
-    
+
     // Add something to the store to test persistence
     act(() => {
       if (firstStore) {
@@ -135,16 +139,20 @@ describe('createRefsStore', () => {
         firstStore.register('test-button', element);
       }
     });
-    
+
     rerender(
       <TestStore.Provider>
-        <TestComponent captureStore={(store) => { secondStore = store; }} />
-      </TestStore.Provider>
+        <TestComponent
+          captureStore={(store) => {
+            secondStore = store;
+          }}
+        />
+      </TestStore.Provider>,
     );
-    
+
     expect(firstStore).not.toBeNull();
     expect(secondStore).not.toBeNull();
-    
+
     // Check if the stores share the same data (indicating they are the same instance)
     expect(firstStore.has('test-button')).toBe(true);
     expect(secondStore.has('test-button')).toBe(true);
@@ -154,4 +162,4 @@ describe('createRefsStore', () => {
     expect(firstStore.register).toBe(secondStore.register);
     expect(firstStore.get).toBe(secondStore.get);
   });
-}); 
+});
