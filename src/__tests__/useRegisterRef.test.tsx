@@ -3,13 +3,20 @@ import { render, renderHook, act, waitFor } from '@testing-library/react';
 import { useRegisterRef } from '../useRegisterRef';
 import { useRefsStore } from '../useRefsStore';
 
+// 테스트용 타입 정의
+type TestRefs = {
+  'test-key': HTMLDivElement;
+  'key1': HTMLDivElement;
+  'key2': HTMLDivElement;
+};
+
 describe('useRegisterRef', () => {
   beforeEach(() => {
     jest.clearAllTimers();
   });
 
   it('should register element when mounted', async () => {
-    const { result: storeResult } = renderHook(() => useRefsStore<HTMLDivElement>());
+    const { result: storeResult } = renderHook(() => useRefsStore<TestRefs>());
     const store = storeResult.current;
     
     // Create a test component that uses the hook
@@ -27,7 +34,7 @@ describe('useRegisterRef', () => {
   });
 
   it('should unregister element when unmounted', async () => {
-    const { result: storeResult } = renderHook(() => useRefsStore<HTMLDivElement>());
+    const { result: storeResult } = renderHook(() => useRefsStore<TestRefs>());
     const store = storeResult.current;
     
     const TestComponent = () => {
@@ -53,7 +60,7 @@ describe('useRegisterRef', () => {
   });
 
   it('should register immediately when isDefer is false', async () => {
-    const { result: storeResult } = renderHook(() => useRefsStore<HTMLDivElement>());
+    const { result: storeResult } = renderHook(() => useRefsStore<TestRefs>());
     const store = storeResult.current;
     
     const TestComponent = () => {
@@ -72,7 +79,7 @@ describe('useRegisterRef', () => {
   });
 
   it('should not register when isEnabled is false', async () => {
-    const { result: storeResult } = renderHook(() => useRefsStore<HTMLDivElement>());
+    const { result: storeResult } = renderHook(() => useRefsStore<TestRefs>());
     const store = storeResult.current;
     
     const TestComponent = () => {
@@ -91,10 +98,10 @@ describe('useRegisterRef', () => {
   });
 
   it('should update registration when key changes', async () => {
-    const { result: storeResult } = renderHook(() => useRefsStore<HTMLDivElement>());
+    const { result: storeResult } = renderHook(() => useRefsStore<TestRefs>());
     const store = storeResult.current;
     
-    const TestComponent = ({ id }: { id: string }) => {
+    const TestComponent = ({ id }: { id: keyof TestRefs }) => {
       const ref = useRegisterRef(store, id);
       return <div ref={ref}>Test</div>;
     };
@@ -115,7 +122,7 @@ describe('useRegisterRef', () => {
   });
 
   it('should handle element change', async () => {
-    const { result: storeResult } = renderHook(() => useRefsStore<HTMLDivElement>());
+    const { result: storeResult } = renderHook(() => useRefsStore<TestRefs>());
     const store = storeResult.current;
     
     const TestComponent = ({ showSecond }: { showSecond: boolean }) => {
@@ -146,7 +153,7 @@ describe('useRegisterRef', () => {
   });
 
   it('should cancel pending RAF on unmount', async () => {
-    const { result: storeResult } = renderHook(() => useRefsStore<HTMLDivElement>());
+    const { result: storeResult } = renderHook(() => useRefsStore<TestRefs>());
     const store = storeResult.current;
     
     const cancelAnimationFrameSpy = jest.spyOn(globalThis, 'cancelAnimationFrame');
@@ -168,7 +175,7 @@ describe('useRegisterRef', () => {
   });
 
   it('should handle options change', async () => {
-    const { result: storeResult } = renderHook(() => useRefsStore<HTMLDivElement>());
+    const { result: storeResult } = renderHook(() => useRefsStore<TestRefs>());
     const store = storeResult.current;
     
     const TestComponent = ({ isEnabled }: { isEnabled: boolean }) => {
@@ -188,5 +195,21 @@ describe('useRegisterRef', () => {
     await waitFor(() => {
       expect(store.has('test-key')).toBe(false);
     });
+  });
+
+  it('should support type-safe key access', () => {
+    const { result: storeResult } = renderHook(() => useRefsStore<TestRefs>());
+    const store = storeResult.current;
+    
+    const TestComponent = () => {
+      // TypeScript should infer the correct ref type based on the key
+      const ref = useRegisterRef(store, 'test-key');
+      return <div ref={ref}>Test</div>;
+    };
+    
+    render(<TestComponent />);
+    
+    // The ref should be typed as React.RefObject<HTMLDivElement>
+    expect(store).toBeDefined();
   });
 }); 

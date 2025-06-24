@@ -11,6 +11,7 @@ interface UseRegisterRefOptions {
 
 /**
  * DOM 요소를 Store에 등록하는 훅
+ * 키별로 타입이 추론되어 타입 안전성을 보장합니다.
  *
  * @param store - RefsStore 인스턴스
  * @param key - 요소를 식별할 고유 키
@@ -19,22 +20,27 @@ interface UseRegisterRefOptions {
  *
  * @example
  * ```tsx
- * const TabRefsStore = createRefsStore<HTMLButtonElement>();
+ * type SearchRefs = {
+ *   'search-field': HTMLDivElement;
+ *   'search-input': HTMLInputElement;
+ * };
  *
- * function Tab({ id, children }) {
- *   const registry = TabRefsStore.useRegistry();
- *   const ref = useRegisterRef(registry, id);
- *   return <button ref={ref}>{children}</button>;
+ * const SearchRefsStore = createRefsStore<SearchRefs>();
+ *
+ * function SearchField() {
+ *   const registry = SearchRefsStore.useStore();
+ *   const ref = useRegisterRef(registry, 'search-field'); // HTMLDivElement로 추론됨
+ *   return <div ref={ref}>Search Field</div>;
  * }
  * ```
  */
-export function useRegisterRef<T extends HTMLElement = HTMLElement>(
+export function useRegisterRef<T extends Record<string, HTMLElement>, K extends keyof T>(
   store: RefsMap<T> | null,
-  key: string,
+  key: K,
   options: UseRegisterRefOptions = {},
-) {
+): React.RefObject<T[K]> {
   const { isDefer = true, isEnabled = true } = options;
-  const elementRef = useRef<T>(null);
+  const elementRef = useRef<T[K]>(null);
 
   useLayoutEffect(() => {
     if (!store || !isEnabled) return () => {};

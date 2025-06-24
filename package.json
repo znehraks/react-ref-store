@@ -2,7 +2,7 @@
   "name": "react-ref-store",
   "author": "designC",
   "license": "MIT",
-  "version": "0.0.1-alpha.3",
+  "version": "0.0.2",
   "description": "A lightweight React library for managing refs in a centralized store",
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.esm.js",
